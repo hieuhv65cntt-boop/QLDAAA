@@ -1,0 +1,136 @@
+﻿@model List<QuanLyAmThucNhaTrang.DAL.BaoCaoDanhGiaVM>
+@{
+    ViewBag.Title = "Báo cáo thống kê lượt đánh giá";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="card border-0 shadow-sm rounded-4 mb-4 d-print-none">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-funnel-fill text-primary me-2"></i>Tham số báo cáo</h5>
+            <form action="@Url.Action("BaoCaoDanhGia", "Admin")" method="GET" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-secondary">Từ ngày</label>
+                    <input type="date" name="TuNgay" class="form-control" value="@ViewBag.TuNgay" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-secondary">Đến ngày</label>
+                    <input type="date" name="DenNgay" class="form-control" value="@ViewBag.DenNgay" required />
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary fw-bold px-4 rounded-pill shadow-sm"><i class="bi bi-search me-1"></i> Xem báo cáo</button>
+                    <button type="button" class="btn btn-success fw-bold px-4 rounded-pill shadow-sm ms-2" onclick="window.print()"><i class="bi bi-printer-fill me-1"></i> Xuất PDF</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden" id="vung-in-bao-cao">
+        <div class="card-body p-4 p-lg-5">
+            <div class="text-center mb-4 pb-3 border-bottom">
+                <h3 class="fw-bold text-uppercase mb-1" style="font-family: 'Times New Roman', Times, serif;">BÁO CÁO THỐNG KÊ SỐ LƯỢT ĐÁNH GIÁ</h3>
+                <p class="fst-italic text-muted m-0">Kỳ báo cáo: Từ ngày <strong>@(Convert.ToDateTime(ViewBag.TuNgay).ToString("dd/MM/yyyy"))</strong> đến ngày <strong>@(Convert.ToDateTime(ViewBag.DenNgay).ToString("dd/MM/yyyy"))</strong></p>
+            </div>
+
+            <table class="table table-bordered table-striped align-middle mt-4">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th style="width: 8%;">STT</th>
+                        <th style="width: 40%;">Tên địa điểm ẩm thực</th>
+                        <th>Số lượt đánh giá (Trong kỳ)</th>
+                        <th>Điểm đánh giá TB</th>
+                        <th>Số vi phạm</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    @{
+                        int stt = 1;
+                        int tongLuotDG = 0;
+                        int tongViPham = 0;
+                    }
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="text-muted fw-bold">@stt</td>
+                                <td class="text-start fw-bold text-primary">@item.TenDiaDiem</td>
+                                <td class="fw-bold fs-5">@item.SoLuotDanhGia</td>
+                                <td>
+                                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fs-6">
+                                        @item.DiemDanhGiaTB <i class="bi bi-star-fill text-dark ms-1"></i>
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (item.SoViPham > 0)
+                                    {
+                                        <span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i> @item.SoViPham</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-success"><i class="bi bi-check-circle-fill"></i> 0</span>
+                                    }
+                                </td>
+                            </tr>
+                            stt++;
+                            tongLuotDG += item.SoLuotDanhGia;
+                            tongViPham += item.SoViPham;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted fst-italic">Không có dữ liệu đánh giá nào phát sinh trong kỳ này.</td>
+                        </tr>
+                    }
+                </tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    <tfoot class="table-group-divider fw-bold bg-light text-center">
+                        <tr>
+                            <td colspan="2" class="text-uppercase text-end pe-4">Tổng Cộng:</td>
+                            <td class="text-primary fs-4">@tongLuotDG</td>
+                            <td>-</td>
+                            <td class="text-danger fs-5">@tongViPham</td>
+                        </tr>
+                    </tfoot>
+                }
+            </table>
+
+            <div class="row mt-5">
+                <div class="col-6"></div>
+                <div class="col-6 text-center">
+                    <p class="mb-1"><em>Khánh Hòa, ngày @DateTime.Now.Day tháng @DateTime.Now.Month năm @DateTime.Now.Year</em></p>
+                    <p class="fw-bold mb-5">Người lập báo cáo</p>
+                    <p class="mt-5 text-muted">(Ký và ghi rõ họ tên)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* CSS Xử lý in ấn báo cáo */
+    @@media print {
+        body * {
+            visibility: hidden;
+        }
+
+        #vung-in-bao-cao, #vung-in-bao-cao * {
+            visibility: visible;
+        }
+
+        #vung-in-bao-cao {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .table-dark {
+            background-color: #000 !important;
+            color: white !important;
+        }
+    }
+</style>

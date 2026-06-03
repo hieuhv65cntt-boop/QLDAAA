@@ -1,0 +1,192 @@
+﻿@model QuanLyAmThucNhaTrang.DAL.DIADIEM
+@{
+    ViewBag.Title = "Đăng ký địa điểm ẩm thực";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+    /* Tối ưu hóa form input cho cả Light và Dark Mode */
+    .form-control, .form-select {
+        border: 1px solid var(--bs-border-color) !important; /* Hiển thị viền rõ ràng */
+        background-color: var(--bs-body-bg) !important; /* Nền theo theme */
+        color: var(--bs-body-color) !important; /* Màu chữ tương phản */
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+        /* Hiệu ứng khi focus (nhấn vào ô nhập liệu) */
+        .form-control:focus, .form-select:focus {
+            border-color: #0d6efd !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+        }
+</style>
+
+<div class="container mt-4 mb-5">
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5">
+        <h3 class="fw-bold border-bottom pb-3 mb-4"><i class="bi bi-shop me-2 text-primary"></i>Đăng ký gian hàng ẩm thực</h3>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success rounded-3"><i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]</div>
+        }
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger rounded-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>@ViewBag.Error</div>
+        }
+
+    <form action="@Url.Action("ThemDiaDiem", "ChuCSKD")" method="POST" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-4">
+
+            <div class="col-lg-6">
+                <h6 class="fw-bold text-secondary mb-3">1. Thông tin cơ bản</h6>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Tên quán ăn / Nhà hàng <span class="text-danger">*</span></label>
+                    <input type="text" name="TenDD" class="form-control py-2" required />
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Danh mục <span class="text-danger">*</span></label>
+                        @Html.DropDownList("MaDM", null, "-- Chọn danh mục --", new { @class = "form-select py-2", required = "required" })
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Khu vực <span class="text-danger">*</span></label>
+                        @Html.DropDownList("MaKV", null, "-- Chọn khu vực --", new { @class = "form-select py-2", required = "required" })
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Địa chỉ chi tiết <span class="text-danger">*</span></label>
+                    <input type="text" name="DiaChiChiTiet" class="form-control py-2" placeholder="Số nhà, tên đường..." required />
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Số điện thoại quán</label>
+                        <input type="tel" name="SDT" class="form-control py-2" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Giờ mở cửa</label>
+                        <input type="time" name="GioMoCua" class="form-control  py-2" value="06:00" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Giờ đóng cửa</label>
+                        <input type="time" name="GioDongCua" class="form-control  py-2" value="22:00" />
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold">Mô tả ngắn gọn</label>
+                    <textarea name="MoTa" class="form-control " rows="3"></textarea>
+                </div>
+
+                <h6 class="fw-bold text-secondary mb-3">2. Hình ảnh mặt tiền <span class="text-danger">*</span></h6>
+                <div class="mb-4">
+                    <input class="form-control" type="file" name="hinhAnhs" accept="image/*" multiple required>
+                    <div class="form-text small">Hỗ trợ định dạng .jpg, .png (Tối đa 5MB). <strong>Bạn có thể quét chuột hoặc giữ phím Ctrl để chọn nhiều ảnh.</strong></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <h6 class="fw-bold text-secondary mb-3">3. Tọa độ bản đồ <span class="text-danger">*</span></h6>
+                <p class="small text-muted mb-2"><i class="bi bi-info-circle me-1"></i>Di chuyển hoặc click lên bản đồ để ghim chính xác vị trí quán ăn của bạn.</p>
+
+                <div id="mapPicker" class="rounded-3 border shadow-sm mb-3" style="height: 380px; width: 100%; z-index: 1;"></div>
+
+                <div class="row g-2">
+                    <div class="col-6">
+                        <input type="text" id="ViDo" name="ViDo" class="form-control  small text-center fw-bold" placeholder="Vĩ độ (Tự động)" readonly required />
+                    </div>
+                    <div class="col-6">
+                        <input type="text" id="KinhDo" name="KinhDo" class="form-control  small text-center fw-bold" placeholder="Kinh độ (Tự động)" readonly required />
+                    </div>
+                </div>
+            </div>
+            <h6 class="fw-bold text-secondary mb-3 mt-4">3. Hình ảnh chi tiết (Không bắt buộc)</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold">Ảnh Không gian quán</label>
+                    <input class="form-control" type="file" name="anhKhongGian" accept="image/*" multiple>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold">Ảnh Thực đơn / Món ăn</label>
+                    <input class="form-control" type="file" name="anhThucDon" accept="image/*" multiple>
+                </div>
+            </div>
+
+
+        </div>
+
+        <hr class="my-4">
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary rounded-pill fw-bold px-5 py-2.5 shadow-sm">
+                <i class="bi bi-cloud-arrow-up-fill me-2"></i> Gửi yêu cầu đăng ký
+            </button>
+        </div>
+    </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Khởi tạo bản đồ trung tâm Nha Trang
+        var map = L.map('mapPicker').setView([12.2451, 109.1953], 14);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        var marker;
+
+        // Hàm hỗ trợ: Cập nhật Vĩ độ / Kinh độ vào form
+        function capNhatToaDo(lat, lng) {
+            document.getElementById('ViDo').value = lat.toFixed(6);
+            document.getElementById('KinhDo').value = lng.toFixed(6);
+        }
+
+        // Sự kiện 1: Khi CLICK lên bản đồ
+        map.on('click', function (e) {
+            var lat = e.latlng.lat;
+            var lng = e.latlng.lng;
+
+            if (marker) {
+                // Nếu ĐÃ CÓ marker trên bản đồ -> Di chuyển marker đến chỗ click
+                marker.setLatLng([lat, lng]);
+            } else {
+                // Nếu CHƯA CÓ marker -> Tạo marker mới VÀ BẬT tính năng kéo thả (draggable)
+                marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+
+                // Sự kiện 2: Khi KÉO THẢ marker (dragend)
+                marker.on('dragend', function (event) {
+                    var position = marker.getLatLng(); // Lấy tọa độ mới sau khi thả chuột
+                    capNhatToaDo(position.lat, position.lng);
+                });
+            }
+
+            // Cập nhật tọa độ vào ô input khi click
+            capNhatToaDo(lat, lng);
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Tìm form đăng ký
+        var formDangKy = document.querySelector("form");
+
+        formDangKy.addEventListener("submit", function (event) {
+            var inputHinhAnh = document.querySelector("input[name='hinhAnhs']");
+
+            // Chỉ cần kiểm tra < 2 là bao trọn cả trường hợp 0 file và 1 file
+            if (inputHinhAnh.files.length < 2) {
+                event.preventDefault();
+                alert("Yêu cầu bắt buộc: Vui lòng tải lên ÍT NHẤT 2 hình ảnh mặt tiền (Bao gồm bảng hiệu và không gian phía trước) để Ban quản trị xác minh!");
+                inputHinhAnh.focus();
+                inputHinhAnh.classList.add("is-invalid");
+            }
+        });
+    });
+</script>

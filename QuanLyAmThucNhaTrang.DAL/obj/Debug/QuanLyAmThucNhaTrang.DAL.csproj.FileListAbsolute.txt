@@ -1,0 +1,12 @@
+E:\CNPM\QuanLyAmThucNhaTrang.DAL\bin\Debug\QuanLyAmThucNhaTrang.DAL.dll.config
+E:\CNPM\QuanLyAmThucNhaTrang.DAL\bin\Debug\QuanLyAmThucNhaTrang.DAL.dll
+E:\CNPM\QuanLyAmThucNhaTrang.DAL\bin\Debug\QuanLyAmThucNhaTrang.DAL.pdb
+E:\CNPM\QuanLyAmThucNhaTrang.DAL\bin\Debug\EntityFramework.dll
+E:\CNPM\QuanLyAmThucNhaTrang.DAL\bin\Debug\EntityFramework.SqlServer.dll
+E:\CNPM\QuanLyAmThucNhaTrang.DAL\bin\Debug\EntityFramework.xml
+E:\CNPM\QuanLyAmThucNhaTrang.DAL\bin\Debug\EntityFramework.SqlServer.xml
+E:\CNPM\QuanLyAmThucNhaTrang.DAL\obj\Debug\QuanLyAmThucNhaTrang.DAL.csproj.AssemblyReference.cache
+E:\CNPM\QuanLyAmThucNhaTrang.DAL\obj\Debug\QuanLyAmThucNhaTrang.DAL.csproj.CoreCompileInputs.cache
+E:\CNPM\QuanLyAmThucNhaTrang.DAL\obj\Debug\QuanLyAm.9820C350.Up2Date
+E:\CNPM\QuanLyAmThucNhaTrang.DAL\obj\Debug\QuanLyAmThucNhaTrang.DAL.dll
+E:\CNPM\QuanLyAmThucNhaTrang.DAL\obj\Debug\QuanLyAmThucNhaTrang.DAL.pdb

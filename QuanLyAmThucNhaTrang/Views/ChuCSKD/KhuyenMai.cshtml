@@ -1,0 +1,124 @@
+﻿@model List<QuanLyAmThucNhaTrang.DAL.KHUYENMAI>
+@{
+    ViewBag.Title = "Quản lý Khuyến mãi";
+}
+
+<div class="container mt-5 mb-5" style="min-height: 60vh;">
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+        <div>
+            <h3 class="fw-bold m-0"><i class="bi bi-gift-fill text-danger me-2"></i>Chương trình Khuyến mãi</h3>
+            <p class="text-muted small m-0">Tạo ưu đãi để thu hút thực khách đến quán của bạn</p>
+        </div>
+        <button class="btn btn-danger rounded-pill fw-bold shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#modalThemKM">
+            <i class="bi bi-plus-circle me-1"></i> Tạo khuyến mãi
+        </button>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success rounded-3 small">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger rounded-3 small">@TempData["Error"]</div>
+    }
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col" id="card_km_@item.MaKM">
+                    <div class="card h-100 border-0 shadow-sm rounded-4" style="border-left: 5px solid #dc3545 !important;">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="badge   text-primary border mb-2">@item.DIADIEM.TenDD</span>
+                                @if (item.NgayKetThuc >= DateTime.Now.Date)
+                                {
+                                    <span class="badge bg-success">Đang hiệu lực</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Đã hết hạn</span>
+                                }
+                            </div>
+                            <h5 class="fw-bold text-dark mb-1">@item.TenKM</h5>
+                            <p class="small text-muted mb-3">
+                                <i class="bi bi-calendar3 me-1"></i> @item.NgayBatDau.ToString("dd/MM/yyyy") - @item.NgayKetThuc.ToString("dd/MM/yyyy")
+                            </p>
+                            <p class="small text-secondary   p-3 rounded-3">@item.NoiDungUuDai</p>
+
+                            <div class="text-end mt-3">
+                                <button onclick="xoaKhuyenMai(@item.MaKM)" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                    <i class="bi bi-trash3"></i> Gỡ bỏ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5   rounded-4">
+            <i class="bi bi-box2-heart text-muted display-4"></i>
+            <h6 class="text-muted mt-3">Chưa có chương trình khuyến mãi nào</h6>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="modalThemKM" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form action="@Url.Action("ThemKhuyenMai", "ChuCSKD")" method="POST">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-gift text-danger me-2"></i>Tạo Khuyến mãi mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Tên chương trình</label>
+                        <input type="text" name="TenKM" class="form-control   border-0" placeholder="VD: Giảm 20% dịp hè..." required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Áp dụng cho quán</label>
+                        @Html.DropDownList("MaDD", null, new { @class = "form-select   border-0", required = "required" })
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Ngày bắt đầu</label>
+                            <input type="date" name="NgayBatDau" class="form-control   border-0" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Ngày kết thúc</label>
+                            <input type="date" name="NgayKetThuc" class="form-control   border-0" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Nội dung ưu đãi chi tiết</label>
+                        <textarea name="NoiDungUuDai" class="form-control bg-light  border-0" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">Lưu khuyến mãi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function xoaKhuyenMai(maKM) {
+        if (confirm('Bạn có chắc chắn muốn xóa khuyến mãi này?')) {
+            fetch(`/ChuCSKD/XoaKhuyenMai?maKM=${maKM}`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById(`card_km_${maKM}`).remove();
+                    } else { alert("Xóa thất bại!"); }
+                });
+        }
+    }
+</script>

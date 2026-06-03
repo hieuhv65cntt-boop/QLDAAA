@@ -1,0 +1,118 @@
+﻿@model List<QuanLyAmThucNhaTrang.DAL.BaoCaoDiaDiemVM>
+@{
+    ViewBag.Title = "Báo cáo số lượng địa điểm";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="card border-0 shadow-sm rounded-4 mb-4 d-print-none">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-funnel-fill text-primary me-2"></i>Tham số báo cáo</h5>
+            <form action="@Url.Action("BaoCaoDiaDiem", "Admin")" method="GET" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-secondary">Từ ngày</label>
+                    <input type="date" name="TuNgay" class="form-control" value="@ViewBag.TuNgay" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-secondary">Đến ngày</label>
+                    <input type="date" name="DenNgay" class="form-control" value="@ViewBag.DenNgay" required />
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary fw-bold px-4 rounded-pill shadow-sm"><i class="bi bi-search me-1"></i> Xem báo cáo</button>
+                    <button type="button" class="btn btn-success fw-bold px-4 rounded-pill shadow-sm ms-2" onclick="window.print()"><i class="bi bi-printer-fill me-1"></i> Xuất file PDF</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden" id="vung-in-bao-cao">
+        <div class="card-body p-4 p-lg-5">
+            <div class="text-center mb-4 pb-3 border-bottom">
+                <h3 class="fw-bold text-uppercase mb-1" style="font-family: 'Times New Roman', Times, serif;">BÁO CÁO THỐNG KÊ SỐ LƯỢNG ĐỊA ĐIỂM</h3>
+                <p class="fst-italic text-muted m-0">Kỳ báo cáo: Từ ngày <strong>@(Convert.ToDateTime(ViewBag.TuNgay).ToString("dd/MM/yyyy"))</strong> đến ngày <strong>@(Convert.ToDateTime(ViewBag.DenNgay).ToString("dd/MM/yyyy"))</strong></p>
+            </div>
+
+            <table class="table table-bordered table-striped align-middle mt-4">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>STT</th>
+                        <th>Loại hình ẩm thực</th>
+                        <th>Đang hoạt động</th>
+                        <th>Tạm ngưng/Chờ duyệt</th>
+                        <th>Đã đóng/Từ chối</th>
+                        <th>Tổng cộng</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    @{
+                        int stt = 1;
+                        int tongHoatDong = 0;
+                        int tongTamNgung = 0;
+                        int tongDaDong = 0;
+                        int tongTatCa = 0;
+                    }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@stt</td>
+                            <td class="text-start fw-semibold">@item.LoaiHinhAmThuc</td>
+                            <td class="text-success fw-bold">@item.DangHoatDong</td>
+                            <td class="text-warning fw-bold">@item.TamNgung</td>
+                            <td class="text-danger fw-bold">@item.DaDongCua</td>
+                            <td class="fw-bold">@item.TongCong</td>
+                        </tr>
+                        stt++;
+                        tongHoatDong += item.DangHoatDong;
+                        tongTamNgung += item.TamNgung;
+                        tongDaDong += item.DaDongCua;
+                        tongTatCa += item.TongCong;
+                    }
+                </tbody>
+                <tfoot class="table-group-divider fw-bold bg-light text-center">
+                    <tr>
+                        <td colspan="2" class="text-uppercase">Tổng Cộng</td>
+                        <td class="text-success fs-5">@tongHoatDong</td>
+                        <td class="text-warning fs-5">@tongTamNgung</td>
+                        <td class="text-danger fs-5">@tongDaDong</td>
+                        <td class="text-primary fs-5">@tongTatCa</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="row mt-5">
+                <div class="col-6"></div>
+                <div class="col-6 text-center">
+                    <p class="mb-1"><em>Khánh Hòa, ngày @DateTime.Now.Day tháng @DateTime.Now.Month năm @DateTime.Now.Year</em></p>
+                    <p class="fw-bold mb-5">Người lập báo cáo</p>
+                    <p class="mt-5 text-muted">(Ký và ghi rõ họ tên)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* CSS Xử lý riêng cho lúc bấm nút In (Ctrl+P) */
+    @@media print {
+        body * {
+            visibility: hidden;
+        }
+
+        #vung-in-bao-cao, #vung-in-bao-cao * {
+            visibility: visible;
+        }
+
+        #vung-in-bao-cao {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .table-dark {
+            background-color: #000 !important;
+            color: white !important;
+        }
+    }
+</style>

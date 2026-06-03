@@ -1,0 +1,173 @@
+﻿@using PagedList.Mvc;
+@model PagedList.IPagedList<QuanLyAmThucNhaTrang.DAL.DANHGIA>
+@{
+    ViewBag.Title = "Quản trị: Xử lý đánh giá vi phạm";
+}
+
+<div class="container mt-5 mb-5" style="min-height: 60vh;">
+    <div class="border-bottom pb-3 mb-4">
+        <h3 class="fw-bold m-0"><i class="bi bi-shield-exclamation text-danger me-2"></i>Quản lý Đánh giá & Bình luận</h3>
+        <p class="text-muted small m-0 mt-1">Theo dõi, ẩn hoặc xóa các nội dung vi phạm tiêu chuẩn cộng đồng.</p>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success rounded-3 small shadow-sm">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+        </div>
+    }
+
+    <div class="card border border-translucent shadow-sm rounded-4 mb-4">
+        <div class="card-body p-3">
+            <form action="@Url.Action("QuanLyDanhGia", "Admin")" method="GET" class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="tuKhoa" class="form-control border-start-0 ps-0 bg-transparent text-body"
+                               placeholder="Tìm từ khóa thô tục, tên quán..." value="@ViewBag.TuKhoa">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select name="locSoSao" class="form-select fw-bold bg-transparent text-body">
+                        <option value="" class="text-dark">-- Tất cả số sao --</option>
+                        <option value="1" class="text-dark" @(ViewBag.LocSoSao == 1 ? "selected" : "")>⭐ 1 Sao (Rất tệ)</option>
+                        <option value="2" class="text-dark" @(ViewBag.LocSoSao == 2 ? "selected" : "")>⭐⭐ 2 Sao (Tệ)</option>
+                        <option value="3" class="text-dark" @(ViewBag.LocSoSao == 3 ? "selected" : "")>⭐⭐⭐ 3 Sao (Trung bình)</option>
+                        <option value="4" class="text-dark" @(ViewBag.LocSoSao == 4 ? "selected" : "")>⭐⭐⭐⭐ 4 Sao (Tốt)</option>
+                        <option value="5" class="text-dark" @(ViewBag.LocSoSao == 5 ? "selected" : "")>⭐⭐⭐⭐⭐ 5 Sao (Tuyệt vời)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary rounded-pill w-100 fw-bold shadow-sm">Lọc dữ liệu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-secondary small">
+                        <tr>
+                            <th class="ps-4 py-3">KHÁCH HÀNG</th>
+                            <th class="py-3" style="width: 20%;">CƠ SỞ ẨM THỰC</th>
+                            <th class="py-3" style="width: 35%;">NỘI DUNG ĐÁNH GIÁ</th>
+                            <th class="py-3">TRẠNG THÁI</th>
+                            <th class="text-end pe-4 py-3">THAO TÁC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(item.SoSao <= 2 ? "table-danger bg-opacity-25" : "")">
+                                <td class="ps-4">
+                                    <h6 class="fw-bold m-0 small">@item.TAIKHOAN.HoTen</h6>
+                                    <small class="text-muted">@item.NgayDanhGia.ToString("dd/MM/yyyy HH:mm")</small>
+                                </td>
+                                <td>
+                                    <span class="d-block fw-semibold text-primary small">@item.DIADIEM.TenDD</span>
+                                </td>
+                                <td>
+                                    <div class="text-warning small mb-1">
+                                        @for (int i = 0; i < item.SoSao; i++)
+                                        {<i class="bi bi-star-fill"></i>}
+                                    </div>
+                                    <p class="text-secondary small m-0 fst-italic" style="line-height: 1.4;">"@item.NoiDung"</p>
+                                </td>
+                                <td>
+                                    @if (item.TrangThai == "HienThi")
+                                    {
+                                        <span class="badge bg-success">Đang hiển thị</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Đã bị ẩn</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-inline-flex gap-2">
+                                        @if (item.TrangThai == "HienThi")
+                                        {
+                                            <form action="@Url.Action("AnDanhGia", "Admin")" method="POST" onsubmit="return confirm('Bạn muốn ẨN bình luận này? (Sẽ bị trừ khỏi điểm TB của quán)');">
+                                                <input type="hidden" name="maDG" value="@item.MaDG" />
+                                                <button type="submit" class="btn btn-warning btn-sm rounded-pill text-dark fw-semibold" title="Ẩn khỏi khách hàng">
+                                                    <i class="bi bi-eye-slash-fill"></i> Ẩn
+                                                </button>
+                                            </form>
+                                        }
+                                        <form action="@Url.Action("XoaDanhGia", "Admin")" method="POST" onsubmit="return confirm('CẢNH BÁO: Xóa vĩnh viễn đánh giá này và các phản hồi liên quan?');">
+                                            <input type="hidden" name="maDG" value="@item.MaDG" />
+                                            <button type="submit" class="btn btn-danger btn-sm rounded-pill fw-semibold" title="Xóa vĩnh viễn khỏi CSDL">
+                                                <i class="bi bi-trash3-fill"></i> Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div> <div class="card-footer bg-transparent border-0 py-3 px-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                    <div class="text-muted small fw-bold mb-3 mb-md-0">
+                        Trang @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) / @Model.PageCount
+                        (Tổng cộng @Model.TotalItemCount đánh giá)
+                    </div>
+
+                    <div class="pagination-custom">
+                        @Html.PagedListPager(Model, page => Url.Action("QuanLyDanhGia",
+                                      new { page, locSoSao = ViewBag.LocSoSao, tuKhoa = ViewBag.TuKhoa }))
+                    </div>
+                </div>
+            </div>
+
+        </div> }
+    else
+    {
+        <div class="text-center py-5">
+            <h5 class="text-muted mt-3">Chưa có đánh giá nào phù hợp với điều kiện tìm kiếm.</h5>
+        </div>
+    }
+</div>
+<style>
+    /* Làm đẹp thanh phân trang PagedList */
+    .pagination-custom .pagination {
+        margin-bottom: 0;
+        gap: 5px;
+    }
+
+        .pagination-custom .pagination li {
+            display: inline-block;
+        }
+
+            .pagination-custom .pagination li a, .pagination-custom .pagination li span {
+                padding: 6px 14px;
+                border-radius: 8px;
+                text-decoration: none;
+                color: var(--bs-body-color);
+                background-color: var(--bs-tertiary-bg);
+                border: 1px solid var(--bs-border-color);
+                font-weight: 600;
+                font-size: 0.875rem;
+                transition: all 0.2s ease-in-out;
+            }
+
+                .pagination-custom .pagination li a:hover {
+                    background-color: #0d6efd;
+                    color: white;
+                    border-color: #0d6efd;
+                }
+
+            .pagination-custom .pagination li.active span {
+                background-color: #0d6efd;
+                color: white;
+                border-color: #0d6efd;
+            }
+
+            .pagination-custom .pagination li.disabled span {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+</style>

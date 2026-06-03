@@ -1,0 +1,183 @@
+﻿@* ============================================================
+    _LoginPartial.cshtml – Menu đăng nhập / Dropdown user
+    ASP.NET MVC 5 (.NET Framework) | Dùng Session để lưu trạng thái
+    Phân quyền theo 3 vai trò: KhachHang, ChuCSKD, QuanTriVien
+    ============================================================ *@
+
+@{
+    /* ── Kiểm tra đăng nhập qua Session ──
+        Khi code hàm Đăng nhập ở Controller, bạn chỉ cần gán:
+        Session["MaTK"] = user.MaTK;
+        Session["HoTen"] = user.HoTen;
+        Session["LoaiTK"] = user.LoaiTK;
+    */
+    var isLoggedIn = Session["MaTK"] != null;
+    var userName = Session["HoTen"]?.ToString() ?? "";
+    var userRole = Session["LoaiTK"]?.ToString() ?? "";
+    var userInitial = !string.IsNullOrEmpty(userName) ? userName.Substring(0, 1).ToUpper() : "?";
+}
+
+@if (isLoggedIn)
+{
+    <div class="dropdown user-dropdown">
+        <button class="dropdown-toggle btn btn-light border-0 d-flex align-items-center gap-2 bg-transparent" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="user-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                @userInitial
+            </span>
+            <span class="user-name fw-semibold text-body">@userName</span>
+            <i class="bi bi-chevron-down text-muted" style="font-size:0.75rem;"></i>
+        </button>
+
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius: 12px; min-width: 220px;">
+            @* ── Thông tin user ── *@
+            <li class="px-3 py-2">
+                <div style="font-weight:600; font-size:0.95rem;">@userName</div>
+                <div class="mt-1" style="font-size:0.8rem;">
+                    @switch (userRole)
+                    {
+                        case "QuanTriVien":
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">Quản trị viên</span>
+                            break;
+                        case "ChuCSKD":
+                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">Chủ CSKD</span>
+                            break;
+                        default:
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">Khách hàng</span>
+                            break;
+                    }
+                </div>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+
+            @* ══════ MENU KHÁCH HÀNG ══════ *@
+            @if (userRole == "KhachHang" || string.IsNullOrEmpty(userRole))
+            {
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("TrangCaNhan", "KhachHang")">
+                        <i class="bi bi-person me-2 text-primary"></i> Trang cá nhân
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("YeuThich", "KhachHang")">
+                        <i class="bi bi-heart me-2 text-danger"></i> Yêu thích
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("LichSuDanhGia", "KhachHang")">
+                        <i class="bi bi-star me-2 text-warning"></i> Lịch sử đánh giá
+                    </a>
+                </li>
+            }
+
+            @* ══════ MENU CHỦ CSKD ══════ *@
+            @if (userRole == "ChuCSKD")
+            {
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("TrangCaNhan", "ChuCSKD")">
+                        <i class="bi bi-person text-secondary"></i> Trang cá nhân
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li class="px-3 py-1">
+                    <small class="text-muted text-uppercase fw-bold" style="font-size:0.72rem; letter-spacing:0.5px;">Quản lý quán</small>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("QuanLyGianHang", "ChuCSKD")">
+                        <i class="bi bi-shop text-primary"></i> Quản lý gian hàng
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("ThemDiaDiem", "ChuCSKD")">
+                        <i class="bi bi-plus-circle text-success"></i> Đăng ký quán mới
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("KhuyenMai", "ChuCSKD")">
+                        <i class="bi bi-gift text-warning"></i> Khuyến mãi
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("PhanHoiDanhGia", "ChuCSKD")">
+                        <i class="bi bi-chat-dots text-info"></i> Phản hồi đánh giá
+                    </a>
+                </li>
+            }
+
+            @* ══════ MENU QUẢN TRỊ VIÊN ══════ *@
+            @if (userRole == "QuanTriVien")
+            {
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("Dashboard", "Admin")">
+                        <i class="bi bi-speedometer2 text-primary"></i> Dashboard
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li class="px-3 py-1">
+                    <small class="text-muted text-uppercase fw-bold" style="font-size:0.72rem; letter-spacing:0.5px;">Quản lý</small>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("KiemDuyetDiaDiem", "Admin")">
+                        <i class="bi bi-check-circle text-success"></i> Kiểm duyệt địa điểm
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("QuanLyDanhGia", "Admin")">
+                        <i class="bi bi-shield-check text-info"></i> Quản lý đánh giá
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("QuanLyDanhMuc", "Admin")">
+                        <i class="bi bi-tags text-warning"></i> Danh mục
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("QuanLyTaiKhoan", "Admin")">
+                        <i class="bi bi-people text-secondary"></i> Tài khoản
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li class="px-3 py-1">
+                    <small class="text-muted text-uppercase fw-bold" style="font-size:0.72rem; letter-spacing:0.5px;">Báo cáo</small>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("BaoCaoDiaDiem", "Admin")">
+                        <i class="bi bi-bar-chart text-primary"></i> Thống kê địa điểm
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("BaoCaoTaiKhoan", "Admin")">
+                        <i class="bi bi-pie-chart text-success"></i> Thống kê tài khoản
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="@Url.Action("BaoCaoDanhGia", "Admin")">
+                        <i class="bi bi-graph-up text-danger"></i> Thống kê đánh giá
+                    </a>
+                </li>
+            }
+
+            @* ══════ ĐĂNG XUẤT (tất cả role) ══════ *@
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+                <form action="@Url.Action("DangXuat", "TaiKhoan")" method="post" class="m-0 p-0">
+                    <button type="submit" class="dropdown-item d-flex align-items-center gap-2 py-2 text-danger fw-semibold">
+                        <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+}
+else
+{
+    @* ── Chưa đăng nhập ── *@
+    <div class="d-flex align-items-center gap-2">
+        <a class="btn btn-primary border-0 fw-semibold text-white d-flex align-items-center gap-2" href="@Url.Action("DangNhap", "TaiKhoan")">
+            <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+        </a>
+        <a class="btn btn-primary text-white fw-semibold rounded-pill px-3 d-flex align-items-center gap-2 shadow-sm" href="@Url.Action("DangKy", "TaiKhoan")">
+            <i class="bi bi-person-plus"></i> Đăng ký
+        </a>
+    </div>
+}

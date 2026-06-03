@@ -1,0 +1,102 @@
+﻿@model List<QuanLyAmThucNhaTrang.DAL.YEUTHICH>
+@{
+    ViewBag.Title = "Bộ Sưu Tập Yêu Thích";
+}
+
+<div class="container mt-5 mb-5" style="min-height: 60vh;">
+    <div class="d-flex align-items-center gap-3 border-bottom pb-3 mb-4">
+        <div class="bg-danger bg-opacity-10 text-danger p-3 rounded-circle d-inline-flex">
+            <i class="bi bi-heart-fill fs-3"></i>
+        </div>
+        <div>
+            <h3 class="fw-bold m-0" style="font-family: 'Playfair Display', serif;">Địa điểm đã lưu</h3>
+            <p class="text-muted small m-0">Danh sách không gian ẩm thực Nha Trang yêu thích của bạn</p>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var item in Model)
+            {
+                var anhMatTien = item.DIADIEM.HINHANH.FirstOrDefault(h => h.LoaiHinhAnh == "MatTien")?.DuongDan;
+                var urlAnh = string.IsNullOrEmpty(anhMatTien)
+                    ? "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=600"
+                    : Url.Content("~" + anhMatTien);
+
+                <div class="col" id="card_yeuthich_@item.DIADIEM.MaDD">
+                    <div class="card h-100 border border-translucent shadow-sm overflow-hidden rounded-4">
+                        <div class="position-relative" style="height: 180px;">
+                            <img src="@urlAnh" class="w-100 h-100 object-fit-cover" alt="@item.DIADIEM.TenDD" />
+                            <span class="position-absolute top-0 start-0 m-3 badge bg-white text-dark shadow-sm py-1.5 px-2.5 small" style="border-radius: 8px;">
+                                <i class="bi bi-tag-fill text-primary me-1"></i> @item.DIADIEM.DANHMUC.TenDM
+                            </span>
+                        </div>
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <h5 class="fw-bold text-truncate mb-0" style="max-width: 85%;">@item.DIADIEM.TenDD</h5>
+                                <span class="badge bg-warning text-dark fw-bold small"><i class="bi bi-star-fill"></i> @item.DIADIEM.DiemDanhGiaTB</span>
+                            </div>
+                            <p class="text-secondary small mb-4 text-truncate-2" style="height: 40px; line-height: 1.4;">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i> @item.DIADIEM.DiaChiChiTiet
+                            </p>
+
+                            <div class="row g-2 mt-auto">
+                                <div class="col-9">
+                                    <a href="@Url.Action("ChiTiet", "DiaDiem", new { id = item.DIADIEM.MaDD })" class="btn btn-outline-primary btn-sm rounded-pill w-100 py-2 fw-semibold">
+                                        <i class="bi bi-eye"></i> Xem thông tin
+                                    </a>
+                                </div>
+                                <div class="col-3">
+                                    <button onclick="boLuuNhanh(@item.DIADIEM.MaDD)" class="btn btn-light text-danger btn-sm rounded-pill w-100 py-2 shadow-sm" title="Xóa khỏi danh sách">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-heartbreak text-muted display-1"></i>
+            <h5 class="text-muted mt-3 fw-bold">Thư mục trống</h5>
+            <p class="text-secondary small mb-4">Bạn chưa lưu địa điểm ẩm thực nào vào danh sách yêu thích.</p>
+            <a href="@Url.Action("Index", "Home")" class="btn btn-primary rounded-pill px-4">Khám phá quán ăn ngay</a>
+        </div>
+    }
+</div>
+
+<script>
+    function boLuuNhanh(maDD) {
+        if (confirm("Bạn có chắc chắn muốn bỏ lưu địa điểm này khỏi danh sách yêu thích?")) {
+            fetch('@Url.Action("ToggleYeuThich", "KhachHang")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'maDD=' + maDD
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.status === "DaXoa") {
+                    // Biến mất thẻ card của địa điểm đó khỏi màn hình một cách mượt mà
+                    var card = document.getElementById('card_yeuthich_maDD' ? 'card_yeuthich_' + maDD : '');
+                    if (card) {
+                        card.style.transition = 'all 0.4s ease';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.8)';
+                        setTimeout(function() {
+                            card.remove();
+                            // Nếu xóa hết sạch ảnh thì reload để hiện màn hình trống
+                            if(document.querySelectorAll('[id^="card_yeuthich_"]').length === 0){
+                                location.reload();
+                            }
+                        }, 400);
+                    }
+                }
+            });
+        }
+    }
+</script>

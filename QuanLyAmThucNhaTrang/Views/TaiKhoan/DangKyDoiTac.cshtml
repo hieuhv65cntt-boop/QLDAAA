@@ -1,0 +1,116 @@
+﻿@{
+    ViewBag.Title = "Trở Thành Đối Tác Ẩm Thực Nha Trang";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Sử dụng chung layout thanh menu của bạn
+}
+
+<div class="container mt-5 mb-5">
+    <div class="card border-0 shadow-lg overflow-hidden rounded-4">
+        <div class="row g-0" style="min-height: 600px;">
+
+            <div class="col-lg-5 text-white p-5 d-flex flex-column justify-content-between position-relative"
+                 style="background: linear-gradient(135deg, rgba(23, 42, 69, 0.95), rgba(13, 110, 253, 0.9)), url('https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=600') center/cover;">
+
+                <div>
+                    <span class="badge bg-warning text-dark fw-bold px-3 py-2 rounded-pill text-uppercase small">Kênh Người Bán</span>
+                    <h2 class="fw-bold text-white mt-3 display-6" style="font-family: 'Playfair Display', serif;">Đưa quán ăn của bạn lên bản đồ du lịch</h2>
+                    <p class="opacity-75 small mt-2">Hợp tác cùng chúng tôi để tiếp cận hàng ngàn khách du lịch trong và ngoài nước đến với Nha Trang mỗi ngày.</p>
+                </div>
+
+                <div class="my-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="bg-white bg-opacity-10 p-2 rounded-3"><i class="bi bi-graph-up-arrow text-warning fs-5"></i></div>
+                        <div><strong class="d-block small">Bùng nổ doanh số</strong><span class="opacity-75 x-small" style="font-size:0.8rem;">Kích cầu doanh thu, quảng bá món ăn đặc sản rộng rãi.</span></div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="bg-white bg-opacity-10 p-2 rounded-3"><i class="bi bi-pin-map-fill text-info fs-5"></i></div>
+                        <div><strong class="d-block small">Định vị thông minh</strong><span class="opacity-75 x-small" style="font-size:0.8rem;">Khách hàng dễ dàng tìm đường tới quán qua hệ thống định vị bản đồ.</span></div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-white bg-opacity-10 p-2 rounded-3"><i class="bi bi-stars text-primary fs-5"></i></div>
+                        <div><strong class="d-block small">Quản lý minh bạch</strong><span class="opacity-75 x-small" style="font-size:0.8rem;">Nhận phản hồi, số sao trực tiếp từ thực khách để nâng cao chất lượng.</span></div>
+                    </div>
+                </div>
+
+                <div class="text-white-50 small">
+                    © @DateTime.Now.Year Hệ thống Quản lý Ẩm thực Nha Trang.
+                </div>
+            </div>
+
+            <div class="col-lg-7 p-5 bg-white d-flex flex-column justify-content-center">
+                <div class="mb-4">
+                    <h3 class="fw-bold m-0 text-dark">Đăng ký mở gian hàng đối tác</h3>
+                    <p class="text-muted small m-0">Vui lòng điền thông tin tài khoản đại diện cho cơ sở kinh doanh</p>
+                </div>
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger border-0 rounded-3 small py-2.5 d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-triangle-fill"></i> @ViewBag.Error
+                    </div>
+                }
+
+                <form action="@Url.Action("DangKyDoiTac", "TaiKhoan")" method="POST" id="formRegMerchant">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-secondary">Họ và tên chủ sở hữu</label>
+                            <input type="text" name="HoTen" class="form-control bg-light border-0 py-2.5 small" placeholder="Ví dụ: Nguyễn Văn A" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-secondary">Số điện thoại cơ sở</label>
+                            <input type="tel" name="SDT" class="form-control bg-light border-0 py-2.5 small" placeholder="Số điện thoại liên hệ chính" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-secondary">Địa chỉ Email</label>
+                            <input type="email" name="Email" class="form-control bg-light border-0 py-2.5 small" placeholder="địa_chỉ@email.com" required />
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-secondary">Tên đăng nhập tài khoản</label>
+                            <input type="text" name="TenDangNhap" class="form-control bg-light border-0 py-2.5 small" placeholder="Tên viết liền không dấu..." required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-secondary">Mật khẩu bảo mật</label>
+                            <input type="password" id="txtPassword" name="MatKhau" class="form-control bg-light border-0 py-2.5 small" placeholder="Tối thiểu 8 ký tự..." required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-secondary">Xác nhận lại mật khẩu</label>
+                            <input type="password" id="txtConfirm" class="form-control bg-light border-0 py-2.5 small" placeholder="********" required />
+                            <div id="errorMsg" class="text-danger small mt-1.5 d-none">Mật khẩu xác nhận không khớp!</div>
+                        </div>
+                    </div>
+
+                    <div class="form-check mt-4 mb-4">
+                        <input class="form-check-input" type="checkbox" value="" id="chkAgree" required>
+                        <label class="form-check-label text-muted small" for="chkAgree">
+                            Tôi cam kết các thông tin cơ sở kinh doanh cung cấp là hoàn toàn chính xác và tuân thủ các điều khoản hoạt động của hệ thống.
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary rounded-pill fw-bold w-100 py-2.5 shadow-sm">
+                        <i class="bi bi-shop-window me-1"></i> Hoàn tất tạo tài khoản đối tác
+                    </button>
+
+                    <p class="text-center text-muted small mt-3 mb-0">
+                        Bạn đã có tài khoản đối tác? <a href="@Url.Action("DangNhap", "TaiKhoan")" class="text-decoration-none fw-bold">Đăng nhập tại đây</a>
+                    </p>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Kiểm tra trùng khớp mật khẩu ngay dưới client trước khi submit form
+    document.getElementById('formRegMerchant').addEventListener('submit', function(e) {
+        var pwd = document.getElementById('txtPassword').value;
+        var confirmPwd = document.getElementById('txtConfirm').value;
+        var error = document.getElementById('errorMsg');
+
+        if(pwd !== confirmPwd) {
+            e.preventDefault();
+            error.classList.remove('d-none');
+        } else {
+            error.classList.add('d-none');
+        }
+    });
+</script>

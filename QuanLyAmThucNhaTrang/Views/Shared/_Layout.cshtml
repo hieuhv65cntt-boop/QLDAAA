@@ -1,0 +1,245 @@
+﻿@* ============================================================
+     MASTER LAYOUT – Hệ thống Quản lý Địa điểm Ẩm thực Nha Trang
+     ASP.NET MVC (.NET Framework) | Bootstrap 5 | Dark Mode | Responsive
+    ============================================================ *@
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Hệ thống Quản lý Địa điểm Ẩm thực Nha Trang – Khám phá, đánh giá và chia sẻ ẩm thực Nha Trang" />
+    <title>@ViewBag.Title – Ẩm thực Nha Trang</title>
+
+    @* ── Bootstrap 5.3 (có hỗ trợ data-bs-theme) ── *@
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    @* ── Bootstrap Icons ── *@
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+    @* ── Google Fonts: Inter (UI) + Playfair Display (heading) ── *@
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+
+    @* ── AOS – Animate On Scroll (animation nhẹ nhàng) ── *@
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+
+    <link href="~/Content/StyleAdmin.css" rel="stylesheet" />
+    @* ── Custom CSS ── *@
+    <link href="~/css/site.css" rel="stylesheet" />
+
+    @RenderSection("Styles", required: false)
+</head>
+
+<body>
+    @* ════════════════════════════════════════════════
+        NAVBAR – Thanh điều hướng chính
+        ════════════════════════════════════════════════ *@
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm site-navbar">
+        <div class="container">
+            @* ── Logo + Brand ── *@
+            <a class="navbar-brand d-flex align-items-center gap-2" href="@Url.Action("Index", "Home")">
+                <span class="brand-icon">
+                    <i class="bi bi-shop"></i>
+                </span>
+                <span class="brand-text">
+                    <span class="brand-main">Ẩm thực</span>
+                    <span class="brand-sub">Nha Trang</span>
+                </span>
+            </a>
+
+            @* ── Hamburger (mobile) ── *@
+            <button class="navbar-toggler border-0" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#navbarMain"
+                    aria-controls="navbarMain" aria-expanded="false" aria-label="Menu">
+                <i class="bi bi-list fs-4"></i>
+            </button>
+
+            @* ── Menu chính ── *@
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "Home")">
+                            <i class="bi bi-house-door me-1"></i>Trang chủ
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("TimKiem", "DiaDiem")">
+                            <i class="bi bi-search me-1"></i>Tìm kiếm
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("BanDo", "DiaDiem")">
+                            <i class="bi bi-geo-alt me-1"></i>Bản đồ
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-primary fw-bold" href="@Url.Action("DangKyDoiTac", "TaiKhoan")">
+                            <i class="bi bi-handshake-fill me-1"></i> Hợp tác cùng chúng tôi
+                        </a>
+                    </li>
+                </ul>
+
+                @* ── Menu phải: Login/User + Dark Mode ── *@
+                <div class="d-flex align-items-center gap-2">
+                    @* Nút Dark/Light Mode *@
+                    <button class="btn btn-icon theme-toggle" id="btnThemeToggle"
+                            title="Chuyển đổi giao diện" aria-label="Chuyển đổi giao diện">
+                        <i class="bi bi-moon-stars" id="themeIcon"></i>
+                    </button>
+
+                    @* Login Partial chuẩn .NET Framework *@
+                    @Html.Partial("_LoginPartial")
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    @* ════════════════════════════════════════════════
+        BREADCRUMB (tùy chọn – hiện khi có ViewData["Breadcrumb"])
+        ════════════════════════════════════════════════ *@
+    @if (ViewData["Breadcrumb"] != null)
+    {
+        <div class="breadcrumb-bar">
+            <div class="container">
+                <nav aria-label="breadcrumb">
+                    @ViewData["Breadcrumb"]
+                </nav>
+            </div>
+        </div>
+    }
+
+    @* ════════════════════════════════════════════════
+        MAIN CONTENT
+        ════════════════════════════════════════════════ *@
+    <main class="site-main">
+        @* Thông báo TempData (success/error/info) *@
+        @if (TempData["Success"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+                </div>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+                </div>
+            </div>
+        }
+        @if (TempData["Info"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-info alert-dismissible fade show d-flex align-items-center" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    @TempData["Info"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+                </div>
+            </div>
+        }
+
+        @RenderBody()
+    </main>
+
+    @* ════════════════════════════════════════════════
+        FOOTER
+        ════════════════════════════════════════════════ *@
+    <footer class="site-footer">
+        <div class="container">
+            <div class="row g-4">
+                @* ── Cột 1: Thông tin ── *@
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-brand d-flex align-items-center gap-2 mb-3">
+                        <span class="brand-icon"><i class="bi bi-shop"></i></span>
+                        <span class="brand-text">
+                            <span class="brand-main">Ẩm thực</span>
+                            <span class="brand-sub">Nha Trang</span>
+                        </span>
+                    </div>
+                    <p class="footer-desc">
+                        Khám phá, đánh giá và chia sẻ những địa điểm ẩm thực
+                        tuyệt vời nhất tại thành phố biển Nha Trang.
+                    </p>
+                    <div class="footer-social d-flex gap-2">
+                        <a href="#" class="social-link" title="Facebook"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="social-link" title="Instagram"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="social-link" title="TikTok"><i class="bi bi-tiktok"></i></a>
+                        <a href="#" class="social-link" title="YouTube"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+
+                @* ── Cột 2: Liên kết nhanh ── *@
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="footer-heading">Khám phá</h6>
+                    <ul class="footer-links">
+                        <li><a href="@Url.Action("TimKiem", "DiaDiem")">Tìm kiếm</a></li>
+                        <li><a href="@Url.Action("BanDo", "DiaDiem")">Bản đồ</a></li>
+                        <li><a href="#">Danh mục</a></li>
+                        <li><a href="#">Khu vực</a></li>
+                    </ul>
+                </div>
+
+                @* ── Cột 3: Dành cho chủ quán ── *@
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="footer-heading">Dành cho chủ quán</h6>
+                    <ul class="footer-links">
+                        <li><a href="@Url.Action("DangKyDD", "ChuQuan")">Đăng ký địa điểm</a></li>
+                        <li><a href="@Url.Action("QuanLy", "ChuQuan")">Quản lý quán</a></li>
+                        <li><a href="@Url.Action("ThemKM", "ChuQuan")">Khuyến mãi</a></li>
+                    </ul>
+                </div>
+
+                @* ── Cột 4: Liên hệ ── *@
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="footer-heading">Liên hệ</h6>
+                    <ul class="footer-contact">
+                        <li>
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>Nha Trang, Khánh Hòa, Việt Nam</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-envelope-fill"></i>
+                            <a href="mailto:info@amthucnhatrang.vn">info&#64;amthucnhatrang.vn</a>
+                        </li>
+                        <li>
+                            <i class="bi bi-telephone-fill"></i>
+                            <a href="tel:02581234567">0258.123.4567</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            @* ── Đường kẻ + Copyright ── *@
+            <hr class="footer-divider" />
+            <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+                <p class="mb-0">&copy; @DateTime.Now.Year Hệ thống Quản lý Ẩm thực Nha Trang. All rights reserved.</p>
+                <p class="mb-0 footer-credit">
+                    Phát triển bởi <strong>Nhóm CNPM</strong> &bull; ASP.NET MVC 5
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    @* ════════════════════════════════════════════════
+        NÚT SCROLL TO TOP
+        ════════════════════════════════════════════════ *@
+    <button class="btn-scroll-top" id="btnScrollTop" title="Về đầu trang" aria-label="Về đầu trang">
+        <i class="bi bi-chevron-up"></i>
+    </button>
+
+    @* ════════════════════════════════════════════════
+        SCRIPTS
+        ════════════════════════════════════════════════ *@
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="~/js/site.js"></script>
+    <script src="~/Scripts/Admin.js"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

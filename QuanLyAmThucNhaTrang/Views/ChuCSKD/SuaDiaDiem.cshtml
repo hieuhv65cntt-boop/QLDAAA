@@ -1,0 +1,191 @@
+﻿@model QuanLyAmThucNhaTrang.DAL.DIADIEM
+@{
+    ViewBag.Title = "Chỉnh sửa thông tin gian hàng";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div class="container mt-4 mb-5">
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+            <h3 class="fw-bold m-0"><i class="bi bi-pencil-square me-2 text-warning"></i>Cập nhật thông tin cơ sở</h3>
+            <a href="@Url.Action("QuanLyGianHang", "ChuCSKD")" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại
+            </a>
+        </div>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger rounded-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>@ViewBag.Error</div>
+        }
+
+        <div class="alert alert-info bg-opacity-10 text-info border-0 rounded-3 small mb-4">
+            <i class="bi bi-info-circle-fill me-2"></i> <strong>Lưu ý:</strong> Khi bạn thay đổi thông tin, trạng thái của quán sẽ được chuyển về <strong>"Chờ xét duyệt"</strong> để Ban quản trị kiểm tra lại tính chính xác.
+        </div>
+
+        <form action="@Url.Action("SuaDiaDiem", "ChuCSKD")" method="POST" enctype="multipart/form-data">
+
+            @Html.AntiForgeryToken()
+
+            @Html.HiddenFor(m => m.MaDD)
+            @Html.HiddenFor(m => m.MaTK)
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Tên quán ăn / Nhà hàng <span class="text-danger">*</span></label>
+                        <input type="text" name="TenDD" class="form-control py-2" value="@Model.TenDD" required />
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Danh mục <span class="text-danger">*</span></label>
+                            @Html.DropDownList("MaDM", null, new { @class = "form-select py-2", required = "required" })
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Khu vực <span class="text-danger">*</span></label>
+                            @Html.DropDownList("MaKV", null, new { @class = "form-select py-2", required = "required" })
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Địa chỉ chi tiết <span class="text-danger">*</span></label>
+                        <input type="text" name="DiaChiChiTiet" class="form-control py-2" value="@Model.DiaChiChiTiet" required />
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Số điện thoại quán</label>
+                            <input type="tel" name="SDT" class="form-control py-2" value="@Model.SDT" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Giờ mở cửa</label>
+                            <input type="time" name="GioMoCua" class="form-control py-2" value="@(Model.GioMoCua.HasValue ? Model.GioMoCua.Value.ToString(@"hh\:mm") : "")" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Giờ đóng cửa</label>
+                            <input type="time" name="GioDongCua" class="form-control py-2" value="@(Model.GioDongCua.HasValue ? Model.GioDongCua.Value.ToString(@"hh\:mm") : "")" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Mô tả ngắn gọn</label>
+                        <textarea name="MoTa" class="form-control" rows="4">@Model.MoTa</textarea>
+                    </div>
+
+                    <h6 class="fw-bold text-secondary mt-4 mb-3">Quản lý hình ảnh hiện tại</h6>
+                    @if (Model.HINHANH != null && Model.HINHANH.Any())
+                    {
+                        <div class="alert alert-warning bg-opacity-10 text-warning border-0 small py-2 mb-3">
+                            <i class="bi bi-trash3-fill me-1"></i> Tick vào ô vuông góc phải của những bức ảnh bạn muốn <strong>XÓA</strong>.
+                        </div>
+
+                        <div class="row g-2 mb-4">
+                            @foreach (var img in Model.HINHANH)
+                            {
+                                <div class="col-4 col-md-3 col-lg-2">
+                                    <div class="position-relative rounded-3 overflow-hidden shadow-sm" style="height: 100px;">
+                                        <img src="@Url.Content("~" + img.DuongDan)" class="w-100 h-100 object-fit-cover" />
+
+                                        <span class="badge bg-dark bg-opacity-75 position-absolute bottom-0 start-0 m-1" style="font-size: 0.6rem;">@img.LoaiHinhAnh</span>
+
+                                        <div class="position-absolute top-0 end-0 m-1">
+                                            <input class="form-check-input bg-danger border-white shadow" type="checkbox" name="anhCanXoa" value="@img.MaHA" style="width: 1.2rem; height: 1.2rem; cursor: pointer;" title="Chọn để xóa">
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <h6 class="fw-bold text-secondary mt-4 mb-3">Bổ sung hình ảnh chi tiết</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Ảnh Không gian quán</label>
+                            <input type="file" name="anhKhongGian" class="form-control" accept="image/*" multiple />
+                            <small class="text-muted fst-italic">Có thể chọn nhiều ảnh cùng lúc.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Ảnh Thực đơn / Món ăn</label>
+                            <input type="file" name="anhThucDon" class="form-control" accept="image/*" multiple />
+                            <small class="text-muted fst-italic">Có thể chọn nhiều ảnh cùng lúc.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <label class="form-label small fw-bold">Tọa độ bản đồ <span class="text-danger">*</span></label>
+                    <p class="small text-muted mb-2">Kéo thả điểm ghim để cập nhật lại vị trí chính xác.</p>
+
+                    <div id="mapPicker" class="rounded-3 border shadow-sm mb-3" style="height: 380px; width: 100%; z-index: 1;"></div>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="text" id="ViDo" name="ViDo" class="form-control small text-center fw-bold" value="@Model.ViDo" readonly required />
+                        </div>
+                        <div class="col-6">
+                            <input type="text" id="KinhDo" name="KinhDo" class="form-control small text-center fw-bold" value="@Model.KinhDo" readonly required />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4">
+            <div class="text-end">
+                <button type="submit" class="btn btn-warning rounded-pill fw-bold px-5 py-2.5 shadow-sm">
+                    <i class="bi bi-save-fill me-2"></i> Lưu thay đổi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* CSS hỗ trợ Dark mode cho Form */
+    .form-control, .form-select {
+        border: 1px solid var(--bs-border-color) !important;
+        background-color: var(--bs-body-bg) !important;
+        color: var(--bs-body-color) !important;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #ffc107 !important;
+            box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25) !important;
+        }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Lấy tọa độ hiện tại từ cơ sở dữ liệu (Model truyền xuống)
+        var currentLat = @Model.ViDo;
+        var currentLng = @Model.KinhDo;
+
+        // Khởi tạo bản đồ ngay tại tọa độ của quán ăn
+        var map = L.map('mapPicker').setView([currentLat, currentLng], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Đặt điểm ghim (marker) hiện tại và BẬT tính năng kéo thả
+        var marker = L.marker([currentLat, currentLng], { draggable: true }).addTo(map);
+
+        function capNhatToaDo(lat, lng) {
+            document.getElementById('ViDo').value = lat.toFixed(6);
+            document.getElementById('KinhDo').value = lng.toFixed(6);
+        }
+
+        // Sự kiện khi KÉO THẢ điểm ghim
+        marker.on('dragend', function (event) {
+            var position = marker.getLatLng();
+            capNhatToaDo(position.lat, position.lng);
+        });
+
+        // Sự kiện khi CLICK ra chỗ khác trên bản đồ
+        map.on('click', function (e) {
+            marker.setLatLng([e.latlng.lat, e.latlng.lng]);
+            capNhatToaDo(e.latlng.lat, e.latlng.lng);
+        });
+    });
+</script>

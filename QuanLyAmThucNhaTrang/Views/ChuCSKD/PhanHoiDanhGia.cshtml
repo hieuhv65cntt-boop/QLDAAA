@@ -1,0 +1,94 @@
+﻿@model List<QuanLyAmThucNhaTrang.DAL.DANHGIA>
+@{
+    ViewBag.Title = "Phản hồi đánh giá thực khách";
+}
+
+<div class="container mt-5 mb-5" style="min-height: 60vh;">
+    <div class="border-bottom pb-3 mb-4">
+        <h3 class="fw-bold m-0"><i class="bi bi-chat-left-quote-fill text-primary me-2"></i>Lắng nghe thực khách</h3>
+        <p class="text-muted small m-0 mt-1">Quản lý và phản hồi các đánh giá từ khách hàng để nâng cao uy tín thương hiệu.</p>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success rounded-3 small">@TempData["Success"]</div>
+    }
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                @foreach (var item in Model)
+                {
+                    <div class="card border-0 shadow-sm rounded-4 mb-4 p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-light text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5" style="width: 50px; height: 50px;">
+                                    @item.TAIKHOAN.HoTen.Substring(0, 1).ToUpper()
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold m-0">@item.TAIKHOAN.HoTen</h6>
+                                    <span class="badge bg-light text-dark border small mt-1">Quán: @item.DIADIEM.TenDD</span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="text-warning small mb-1">
+                                    @for (int i = 0; i < item.SoSao; i++)
+                                    {<i class="bi bi-star-fill"></i>}
+                                    @for (int i = item.SoSao; i < 5; i++)
+                                    {<i class="bi bi-star text-muted opacity-25"></i>}
+                                </div>
+                                <small class="text-muted" style="font-size: 0.75rem;">@item.NgayDanhGia.ToString("dd/MM/yyyy HH:mm")</small>
+                            </div>
+                        </div>
+
+                        <p class="text-secondary small fst-italic" style="line-height: 1.6;">"@item.NoiDung"</p>
+
+                        @{
+                            var phanHoiDaCo = item.PHANHOI?.FirstOrDefault();
+                        }
+
+                        @if (phanHoiDaCo != null)
+                        {
+                            <div class="bg-primary bg-opacity-10 rounded-3 p-3 mt-3 border-start border-primary border-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="fw-bold text-primary m-0 small"><i class="bi bi-reply-all-fill me-1"></i>Phản hồi của bạn</h6>
+                                    <small class="text-muted" style="font-size: 0.75rem;">@phanHoiDaCo.NgayPhanHoi.ToString("dd/MM/yyyy")</small>
+                                </div>
+                                <p class="m-0 text-dark small" style="line-height: 1.5;">@phanHoiDaCo.NoiDung</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-end mt-2">
+                                <button class="btn btn-outline-primary btn-sm rounded-pill px-4 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#replyForm_@item.MaDG">
+                                    <i class="bi bi-reply-fill"></i> Trả lời đánh giá này
+                                </button>
+                            </div>
+
+                            <div class="collapse mt-3" id="replyForm_@item.MaDG">
+                                <form action="@Url.Action("GuiPhanHoi", "ChuCSKD")" method="POST" class="bg-light p-3 rounded-3 border">
+                                    <input type="hidden" name="MaDG" value="@item.MaDG" />
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold text-secondary">Nội dung phản hồi từ chủ cơ sở:</label>
+                                        <textarea name="NoiDung" class="form-control text-sm" rows="3" placeholder="Cảm ơn quý khách đã ghé thăm..." required></textarea>
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold shadow-sm">Gửi phản hồi</button>
+                                    </div>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 bg-light rounded-4">
+            <i class="bi bi-chat-square-text text-muted display-4"></i>
+            <h6 class="text-muted mt-3">Chưa có đánh giá nào từ thực khách</h6>
+        </div>
+    }
+</div>

@@ -1,0 +1,262 @@
+﻿@{
+    ViewBag.Title = "Bản Đồ Ẩm Thực Nha Trang";
+    var danhMucList = ViewBag.DanhMucList as List<QuanLyAmThucNhaTrang.DAL.DANHMUC>;
+    var khuVucList = ViewBag.KhuVucList as List<QuanLyAmThucNhaTrang.DAL.KHUVUC>;
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div class="container-fluid px-0">
+    <div class="row g-0 position-relative" style="height: calc(100vh - 70px); overflow: hidden;">
+
+        <div class="col-lg-3 d-none d-lg-block bg-white border-end shadow-sm z-3 overflow-auto" style="height: 100%;">
+            <div class="p-4">
+                <h5 class="fw-bold text-dark mb-4"><i class="bi bi-map-fill text-primary me-2"></i>Khám phá Bản đồ</h5>
+
+                <form id="desktopFilterForm">
+                    <div class="mb-3">
+                        <label class="form-label text-dark small fw-bold text-secondary">Từ khóa</label>
+                        <input type="text" id="tuKhoa" class="form-control bg-light border-0" placeholder="Tìm tên quán, món ăn..." onkeyup="taiDuLieuBanDo()">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-dark small fw-bold text-secondary">Danh mục</label>
+                        <select id="maDM" class="form-select bg-light text-dark border-0" onchange="taiDuLieuBanDo()">
+                            <option value="">-- Tất cả danh mục --</option>
+                            @if (danhMucList != null)
+                            {
+                                foreach (var dm in danhMucList)
+                                {
+                                    <option value="@dm.MaDM">@dm.TenDM</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-dark small fw-bold text-secondary">Khu vực</label>
+                        <select id="maKV" class="form-select bg-light text-dark border-0" onchange="taiDuLieuBanDo()">
+                            <option value="">-- Tất cả khu vực --</option>
+                            @if (khuVucList != null)
+                            {
+                                foreach (var kv in khuVucList)
+                                {
+                                    <option value="@kv.MaKV">@kv.TenKV</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </form>
+
+                <hr class="text-muted opacity-25">
+                <div id="desktopThongBao" class="text-muted small fw-bold mt-3">Đang tải dữ liệu...</div>
+            </div>
+        </div>
+
+        <div class="col-lg-9 col-12 h-100 position-relative">
+            <div id="map" style="width: 100%; height: 100%; z-index: 1;"></div>
+
+            <div class="position-absolute bottom-0 start-50 translate-middle-x mb-4 d-lg-none" style="z-index: 2;">
+                <button class="btn btn-dark rounded-pill shadow-lg px-4 py-2.5 fw-bold d-inline-flex align-items-center gap-2"
+                        type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileFilterOffcanvas">
+                    <i class="bi bi-funnel-fill text-warning"></i> Lọc địa điểm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-bottom d-lg-none rounded-top-4" style="height: 50vh;" tabindex="-1" id="mobileFilterOffcanvas" aria-labelledby="mobileFilterOffcanvasLabel">
+    <div class="offcanvas-header border-bottom py-3">
+        <h6 class="offcanvas-title fw-bold" id="mobileFilterOffcanvasLabel"><i class="bi bi-sliders me-2"></i>Bộ lọc tìm kiếm</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-4 bg-light">
+        <form id="mobileFilterForm">
+            <div class="mb-3">
+                <input type="text" id="tuKhoaMobile" class="form-control border-0 shadow-sm py-2" placeholder="Tìm tên quán, món ăn..." onkeyup="taiDuLieuBanDo()">
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <select id="maDMMobile" class="form-select border-0 shadow-sm py-2" onchange="taiDuLieuBanDo()">
+                        <option value="">-- Danh mục --</option>
+                        @if (danhMucList != null)
+                        {
+                            foreach (var dm in danhMucList)
+                            {
+                                <option value="@dm.MaDM">@dm.TenDM</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-6">
+                    <select id="maKVMobile" class="form-select border-0 shadow-sm py-2" onchange="taiDuLieuBanDo()">
+                        <option value="">-- Khu vực --</option>
+                        @if (khuVucList != null)
+                        {
+                            foreach (var kv in khuVucList)
+                            {
+                                <option value="@kv.MaKV">@kv.TenKV</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div id="mobileThongBao" class="text-center text-muted small fw-bold mt-2"></div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Làm mờ hậu cảnh kính trên mobile */
+    .backdrop-blur {
+        backdrop-filter: blur(8px);
+    }
+
+    /* Thiết kế lõi cho Custom Pin trên Bản đồ */
+    .map-custom-marker {
+        position: relative;
+        width: 40px !important;
+        height: 40px !important;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+        border: 2.5px solid #0d6efd; /* Sẽ đổi động bằng JS */
+        transition: transform 0.2s;
+    }
+
+        .map-custom-marker:hover {
+            transform: scale(1.15);
+            z-index: 9999 !important;
+        }
+
+        .map-custom-marker i {
+            font-size: 1.15rem;
+        }
+    /* Khối đính kèm điểm sao nhỏ trên đầu ghim */
+    .map-marker-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ffc107;
+        color: #212529;
+        font-size: 0.65rem;
+        font-weight: 800;
+        border-radius: 6px;
+        padding: 1px 4px;
+        border: 1px solid white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+</style>
+
+<script>
+    var map;
+    var markerLayer;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        map = L.map('map', { zoomControl: false }).setView([12.2451, 109.1953], 14);
+
+        // Đẩy nút Zoom sang góc phải dưới để không vướng góc nhìn mobile
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        markerLayer = L.layerGroup().addTo(map);
+        taiDuLieuBanDo();
+    });
+
+    // HÀM NÂNG CẤP 3: Cấu hình Icon & Màu sắc tương ứng theo Danh mục của bạn
+    function layCauHinhMarker(tenDM) {
+        switch (tenDM) {
+            case 'Quán ăn':
+                return { iconClass: 'bi-shop text-warning', color: '#ffc107' };
+            case 'Nhà hàng':
+                return { iconClass: 'bi-utensils text-danger', color: '#dc3545' };
+            case 'Quán cà phê':
+                return { iconClass: 'bi-cup-hot-fill text-success', color: '#198754' };
+            case 'Quán bar / pub':
+                return { iconClass: 'bi-glass-cocktail text-info', color: '#0dcaf0' };
+            case 'Ẩm thực đường phố':
+                return { iconClass: 'bi-egg-fried text-primary', color: '#0d6efd' };
+            case 'Tiệm bánh':
+                return { iconClass: 'bi-cake2-fill text-secondary', color: '#6c757d' };
+            default:
+                return { iconClass: 'bi-geo-alt-fill text-primary', color: '#0d6efd' };
+        }
+    }
+
+    function taiDuLieuBanDo() {
+        // Tự động kiểm tra thiết bị để lấy giá trị từ form Desktop hoặc Mobile phù hợp
+        var laMobile = window.innerWidth < 992;
+        var tuKhoa = laMobile ? document.getElementById('tuKhoaMobile').value : document.getElementById('tuKhoa').value;
+        var maDM = laMobile ? document.getElementById('maDMMobile').value : document.getElementById('maDM').value;
+        var maKV = laMobile ? document.getElementById('maKVMobile').value : document.getElementById('maKV').value;
+
+        var url = `/DiaDiem/LayDuLieuBanDo?tuKhoa=${encodeURIComponent(tuKhoa)}&maDM=${maDM}&maKV=${maKV}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                markerLayer.clearLayers();
+
+                // Cập nhật text số lượng lên cả 2 giao diện thông báo
+                var textThongBao = `<i class="bi bi-geo-alt-fill text-danger"></i> Tìm thấy ${data.length} địa điểm.`;
+                document.getElementById('desktopThongBao').innerHTML = textThongBao;
+                document.getElementById('mobileThongBao').innerHTML = textThongBao;
+
+                var toaDoCacDiem = [];
+
+                data.forEach(function (diadiem) {
+                    // Lấy cấu hình màu sắc và icon riêng cho quán ăn này
+                    var cauHinh = layCauHinhMarker(diadiem.TenDM);
+
+                    // Khởi tạo cụm mã HTML thay thế hình giọt nước mặc định
+                    var htmlMarker = `
+                        <div class="map-custom-marker" style="border-color: ${cauHinh.color};">
+                            <i class="${cauHinh.iconClass}"></i>
+                            <div class="map-marker-badge">${diadiem.Diem}</div>
+                        </div>
+                    `;
+
+                    // Tạo DivIcon từ mã HTML trên
+                    var customIcon = L.divIcon({
+                        html: htmlMarker,
+                        className: 'clear-leaflet-default-style',
+                        iconSize: [40, 40],
+                        iconAnchor: [20, 20],
+                        popupAnchor: [0, -20]
+                    });
+
+                    var popupContent = `
+                        <div style="min-width: 200px; font-family: sans-serif;">
+                            <span class="badge bg-primary mb-1">${diadiem.TenDM}</span>
+                            <h6 class="fw-bold mb-1" style="font-size:0.95rem; color:#212529;">${diadiem.TenDD}</h6>
+                            <div class="text-warning small mb-2"><i class="bi bi-star-fill"></i> ${diadiem.Diem}</div>
+                            <p class="text-muted small mb-2" style="line-height:1.3; font-size:0.8rem;"><i class="bi bi-geo-alt"></i> ${diadiem.DiaChi}</p>
+                            <a href="/DiaDiem/ChiTiet/${diadiem.MaDD}" class="btn btn-sm btn-primary text-white w-100 py-1 fw-bold rounded-pill" style="font-size:0.75rem;">Xem chi tiết</a>
+                        </div>
+                    `;
+
+                    var marker = L.marker([diadiem.ViDo, diadiem.KinhDo], { icon: customIcon })
+                        .bindPopup(popupContent);
+
+                    markerLayer.addLayer(marker);
+                    toaDoCacDiem.push([diadiem.ViDo, diadiem.KinhDo]);
+                });
+
+                // Tự động thu phóng thông minh
+                if (toaDoCacDiem.length > 0) {
+                    map.fitBounds(toaDoCacDiem, { padding: [50, 50], maxZoom: 16 });
+                } else {
+                    map.setView([12.2451, 109.1953], 13);
+                }
+            })
+            .catch(error => console.error('Lỗi khi tải dữ liệu bản đồ:', error));
+    }
+</script>

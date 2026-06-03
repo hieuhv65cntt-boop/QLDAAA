@@ -1,0 +1,74 @@
+﻿@model QuanLyAmThucNhaTrang.DAL.TAIKHOAN
+@{
+    ViewBag.Title = "Tham Gia Cộng Đồng Ẩm Thực";
+}
+
+<div class="row justify-content-center py-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-0 shadow-lg overflow-hidden" style="border-radius: 24px;">
+            <div class="row g-0">
+                <div class="col-md-5 d-none d-md-block" style="background: url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=600') center/cover;">
+                    <div class="h-100 w-100" style="background: linear-gradient(rgba(10, 88, 202, 0.6), rgba(10, 88, 202, 0.9));">
+                        <div class="p-4 text-white d-flex flex-column justify-content-center h-100">
+                            <h3 class="fw-bold text-dark">Khám phá tinh hoa Nha Trang</h3>
+                            <p class="small opacity-75">Tham gia ngay để lưu lại các địa điểm yêu thích và nhận ưu đãi từ các nhà hàng hàng đầu.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7 p-4 bg-white">
+                    <h3 class="fw-bold text-dark mb-1">Đăng ký tài khoản</h3>
+                    <p class="text-muted small mb-4">Hoàn tất thông tin bên dưới để bắt đầu</p>
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger border-0 small py-2">@ViewBag.Error</div>
+                    }
+
+                    <form action="@Url.Action("DangKy", "TaiKhoan")" method="POST">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label text-dark small fw-bold">Họ và tên</label>
+                                <input type="text" name="HoTen" class="form-control border-0" placeholder="Nguyễn Văn A" required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-dark small fw-bold">Tên đăng nhập</label>
+                                <input type="text" name="TenDangNhap" class="form-control border-0" required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-dark small fw-bold">Mật khẩu</label>
+                                <input type="password" name="MatKhau" class="form-control border-0" required />
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label text-dark small fw-bold">Email</label>
+                                <input type="email" name="Email" class="form-control border-0" placeholder="example@gmail.com" required />
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label text-dark small fw-bold">Số điện thoại</label>
+                                <input type="tel" name="SDT" class="form-control border-0" required />
+                            </div>
+                        </div>
+
+                        <div class="form-check mt-3 mb-4">
+                            <input class="form-check-input" type="checkbox" required id="terms">
+                            <label class="form-check-label small text-muted" for="terms">
+                                Tôi đồng ý với các điều khoản và quy định của hệ thống.
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-pill shadow-sm mb-3">
+                            Tạo Tài Khoản Ngay
+                        </button>
+
+                        <div class="text-center">
+                            <p class="small text-muted">Đã có thành viên? <a href="@Url.Action("DangNhap", "TaiKhoan")" class="fw-bold text-decoration-none">Đăng nhập</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
